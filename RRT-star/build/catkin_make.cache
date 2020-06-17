@@ -1,0 +1,2 @@
+beginner_tutorials:beginner_tutorials_1:rrt
+-DCATKIN_DEVEL_PREFIX=/home/jennish/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/jennish/catkin_ws/install -G Unix Makefiles

@@ -1,0 +1,8 @@
+prefix=/home/jennish/catkin_ws/devel
+
+Name: rrt
+Description: Description of rrt
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/jennish/catkin_ws/devel/lib 
+Requires: 
