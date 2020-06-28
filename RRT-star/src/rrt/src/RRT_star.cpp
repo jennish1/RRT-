@@ -5911,7 +5911,8 @@ Point gridSize = {gridx, gridy};
 Point goal= {goalx, goaly};
 Point beg= {begx, begy};
 
-int arr_1[arr_size][arr_size];
+// int arr_1[arr_size][arr_size];
+int arr_1[1000][1000];
 
 
 vector<vector<int> > obstacle_map;
@@ -5983,7 +5984,11 @@ public:
 				a= false;
 				
 		}*/
-		if(a)
+
+		Node* m = new Node;
+		m->P = p;
+
+		if(obstacle_check(m))
 		{
 			Node* rand_node= new Node;
 			rand_node-> P= p;
@@ -6115,12 +6120,38 @@ public:
 	// 	return true;
 	// }
 
+	bool obstacle_check_1(Node* N)
+	{
+		Point p= N->P;
+		double a, b;
+		a= p.x;
+		b= p.y;
+
+		int c, d;
+
+		if(a-floor(a) < 0.5)
+			c = floor(a);
+		else
+			c = ceil(a);
+
+		if(b-floor(b) < 0.5)
+			d = floor(b);
+		else
+			d = ceil(b);
+
+		if(arr_1[c][d]==1)
+			return false;
+		return true;
+	}
+
 	bool obstacle_check(Node* N)
 	{
 		Point p= N->P;
 		int a, b;
 		a= p.x;
 		b= p.y;
+
+		
 		if(arr_1[a][b]==1)
 			return false;
 		return true;
@@ -6160,9 +6191,9 @@ public:
 			Point n_1= {((c_z)*A.x+(1-c_z)*B.x),((c_z)*A.y+(1-c_z)*B.y)};
 			N_1->P= n_1;
 			if(!(obstacle_check(N_1)))
-				return 0;
+				return false;
 		}
-		return 1;
+		return true;
 	}
 
 
@@ -6192,47 +6223,64 @@ public:
 		float s= stepsize;
 		Point m;
 		//cout<<distance(nearest->P, N->P)<<endl;
-		if(linejoin_check(nearest, N))
+		// if(linejoin_check(nearest, N))
+		// {
+		// 	if((distance(N->P, nearest->P)< s))
+		// 	{
+		// 		new_node->P= N->P;
+		// 		new_node->cost= nearest->cost+ distance(N->P, nearest->P);
+		// 		new_node->parent= nearest;
+
+
+		// 		all_nodes.push_back(new_node);
+		// 		return new_node;
+		// 	}
+		// 	else
+		// 	{
+		// 		m.x= 1/(distance(N->P, nearest->P))*(s*((N->P).x) + (distance(N->P, nearest->P) - s)*((nearest->P).x));
+		// 		m.y= 1/(distance(N->P, nearest->P))*(s*((N->P).y) + (distance(N->P, nearest->P) - s)*((nearest->P).y));
+		// 		new_node->P= m;
+		// 		new_node->cost= nearest->cost + s;
+		// 		new_node->parent= nearest;
+
+
+		// 		all_nodes.push_back(new_node);
+		// 		return new_node;
+		// 	}
+		// }
+
+
+		if((distance(N->P, nearest->P)< s))
 		{
-			if((distance(N->P, nearest->P)< s))
+			if(linejoin_check(nearest, new_node))
 			{
 				new_node->P= N->P;
 				new_node->cost= nearest->cost+ distance(N->P, nearest->P);
 				new_node->parent= nearest;
 
-				if(all_nodes.size() == 1)
-				{
-					cout << endl << endl << "$$$$$$$$$$$$$$$$$$$" << endl;
-					cout << new_node->P.x << " " << new_node->P.y << endl;
-					cout << N->P.x << " " << N->P.y << endl;
-					cout << nearest->P.x << " " << nearest->P.y << endl;
-					cout << "$$$$$$$$$$$$$" << endl << endl << endl;
-				}
-
-				all_nodes.push_back(new_node);
-				return new_node;
-			}
-			else
-			{
-				m.x= 1/(distance(N->P, nearest->P))*(s*((N->P).x) + (distance(N->P, nearest->P) - s)*((nearest->P).x));
-				m.y= 1/(distance(N->P, nearest->P))*(s*((N->P).y) + (distance(N->P, nearest->P) - s)*((nearest->P).y));
-				new_node->P= m;
-				new_node->cost= nearest->cost + s;
-				new_node->parent= nearest;
-
-				if(all_nodes.size() == 1)
-				{
-					cout << endl << endl << "$$$$$$$$$$$$$$$$$$$" << endl;
-					cout << new_node->P.x << " " << new_node->P.y << endl;
-					cout << N->P.x << " " << N->P.y << endl;
-					cout << nearest->P.x << " " << nearest->P.y << endl;
-					cout << "$$$$$$$$$$$$$" << endl << endl << endl;
-				}
 
 				all_nodes.push_back(new_node);
 				return new_node;
 			}
 		}
+		else
+		{
+			m.x= 1/(distance(N->P, nearest->P))*(s*((N->P).x) + (distance(N->P, nearest->P) - s)*((nearest->P).x));
+			m.y= 1/(distance(N->P, nearest->P))*(s*((N->P).y) + (distance(N->P, nearest->P) - s)*((nearest->P).y));
+			new_node->P= m;
+			if(linejoin_check(nearest, new_node))
+			{
+				new_node->cost= nearest->cost + s;
+				new_node->parent= nearest;
+
+
+				all_nodes.push_back(new_node);
+				return new_node;
+			}
+		}
+
+
+
 		//cout<<nearest->P.x<<endl<<nearest->P.y<<endl;
 		//cout<<"00000000000000"<<endl<<m.x<<endl<<m.y<<endl;
 		int a= 1;
@@ -6367,7 +6415,7 @@ public:
 		
 		for(int i=0; i<w.size(); i++)
 		{
-			if((N->cost+ distance(N->P, w[i]->P)) < w[i]->cost)
+			if((N->cost+ distance(N->P, w[i]->P)) < w[i]->cost and w[i] != N)
 			{
 				if(w[i]== final)
 				{
@@ -6415,26 +6463,33 @@ public:
 
 	vector<Node*> shortest_path(Node* start, Node* final)
 	{
+		cout << "INSIDE shortest_path " << endl;
 		vector<Node*> path;
 		
 		Node* a= final;
 		int i=1;
+
+		cout << "vandhuruchu" << endl;
 			while(!(a->parent== NULL))
 			{
-				//cout<<i<<endl;
+				cout << "i: " << i << " --> " << a->parent;
 
 				path.push_back(a);
 				
-				//cout<<path.size()<<endl;
+				cout<<path.size()<<endl;
 				if((a->parent==start))
 					path.push_back(start);
 				a= a->parent;
 				
+				cout << "Here also -->" << endl;
+				cout << a->parent << endl;
+				cout << "here too" << endl;
+
 				i++;
 				
 			}
 			
-			
+			cout << "Here also working" << endl;
 			//path.push_back(start->P);
 		return path;
 	}
@@ -6450,7 +6505,7 @@ vector<Node*> find_path()
 	bool c= 0;
 	cout << endl << "All nodes size " << rrt.all_nodes.size() << endl << endl;
 
-	int iter_max= 6000;
+	int iter_max= 4000;
 	vector<Node*> Path_nodes;
 	vector<Point> random_nodes;
 	Node* rand_n= new Node;
@@ -6462,14 +6517,18 @@ vector<Node*> find_path()
 
 	for(int i= 1; i<iter_max; i++)
 	{
-		
+		cout << "i value " << i << endl;
 
 
 		rand_n= rrt.generate_randnode();
+		cout << "Here-->1" << endl;
 		random_nodes.push_back(rand_n->P);
+		cout << "Here-->2" << endl;
 		nearest_1= rrt.nearest_node(rand_n);
+		cout << "Here-->3" << endl;
 		
 		new_n= rrt.new_node(nearest_1, rand_n);
+		cout << "Here-->4" << endl;
 		if(!(new_n==NULL))
 		{
 			
@@ -6481,7 +6540,9 @@ vector<Node*> find_path()
 			{
 				
 				rrt.best_parent(new_n);
+				cout << "Here-->5" << endl;
 				rrt.rewire(new_n);
+				cout << "Here-->6" << endl;
 				if(check==1)
 				{
 					if(rrt.goal_check(new_n, goal))
@@ -6490,13 +6551,17 @@ vector<Node*> find_path()
 					}
 				
 				}
+				cout << "Here-->7" << endl;
 				Path_nodes= rrt.shortest_path(rrt.start, rrt.final);
+				cout << "Here-->8" << endl;
 				
 			}
 			else
 			{
-				rrt.best_parent(new_n);				
+				rrt.best_parent(new_n);	
+				cout << "Here-->5" << endl;			
 				rrt.rewire(new_n);
+				cout << "Here-->6" << endl;
 				if(check==1)
 				{
 					if(rrt.goal_check(new_n, goal))
@@ -6504,6 +6569,8 @@ vector<Node*> find_path()
 						check=0;
 					}
 				}
+				cout << "Here-->7" << endl;
+				cout << "Here-->88" << endl;
 			}
 		}
 
@@ -6512,6 +6579,14 @@ vector<Node*> find_path()
 
 	}
 	float q= 0;
+
+	
+
+	if(Path_nodes.size() == 0)
+	{
+		cout << "NOOOO PAATTHHHHHH" << endl;
+		exit(0);
+	}
 
 	vector<Point> Path;
 
@@ -6557,116 +6632,7 @@ vector<Node*> find_path()
 
 
 
-vector<Node*> find_path_1()
-{
-	RRT rrt;	
-	bool c= 0;
-	cout << endl << "All nodes size " << rrt.all_nodes.size() << endl << endl;
 
-	int iter_max= 6000;
-	vector<Node*> Path_nodes;
-	vector<Point> random_nodes;
-	Node* rand_n= new Node;
-	Node* nearest_1= new Node;
-	Node* new_n= new Node;
-
-	int check= 1;
-
-
-	for(int i= 1; i<iter_max; i++)
-	{
-		
-
-
-		rand_n= rrt.generate_randnode();
-		random_nodes.push_back(rand_n->P);
-		nearest_1= rrt.nearest_node(rand_n);
-		
-		new_n= rrt.new_node(nearest_1, rand_n);
-		if(!(new_n==NULL))
-		{
-			
-
-			c= !(rrt.final->parent== NULL);
-			//cout<<c<<endl;
-
-			if(c==1)
-			{
-				
-				rrt.best_parent(new_n);
-				rrt.rewire(new_n);
-				if(check==1)
-				{
-					if(rrt.goal_check(new_n, goal))
-					{
-						check=0;
-					}
-				
-				}
-				Path_nodes= rrt.shortest_path(rrt.start, rrt.final);
-				
-			}
-			else
-			{
-				rrt.best_parent(new_n);				
-				rrt.rewire(new_n);
-				if(check==1)
-				{
-					if(rrt.goal_check(new_n, goal))
-					{
-						check=0;
-					}
-				}
-			}
-		}
-
-
-		
-
-	}
-	float q= 0;
-
-	vector<Point> Path;
-
-	for(int i=0; i< Path_nodes.size(); i++)
-	{
-		Path.push_back(Path_nodes[i]->P);
-	}
-
-	 //for(int i=0;i<Path.size();i++)
-	 //{
-	 	//cout<<Path[i].x<< ", "<< Path[i].y<< endl;
-
-	 //}
-
-	// cout<<5555555<<endl;
-
-	// vector<Node*> all_1= rrt.all_nodes;
-	 
-	//  cout<<rrt.linejoin_check(rrt.start, rrt.final)<<endl<<666<<endl;;
-
-	 cout<<rrt.all_nodes[1]->P.x<<","<<rrt.all_nodes[1]->P.y<<endl;
-	 cout<<rrt.all_nodes[1]->cost<<endl<<endl;
-
-	cout<<555555<<endl;
-
-	 // for(int i=0;i<Path.size();i++)
-	 // {
-	 // 	cout<<Path[i].x<< ", "<< Path[i].y<< endl<<Path_nodes[i]->cost<<endl;
-	 // 	if(i>0)
-	 // 		cout<<rrt.distance(Path[i], Path[i-1])<<endl<<endl;
-
-	 // }
-
-	  cout<<endl<<rrt.final->cost<<endl;
-	 
-	 
-	 
-	 
-	 int s=1;
-	 return Path_nodes;
-
-}
 
 
 void publisher(vector<Point> Path, ros::Publisher chatter_pub, nav_msgs::Path poses)
@@ -6788,13 +6754,14 @@ void publisher(vector<Point> Path, ros::Publisher chatter_pub, nav_msgs::Path po
 void RoadCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
 	//cout<<666666<<endl;
+	cout << "No of times " << no_of_times << endl;
 	if(!msg->data.empty())
 	{
 		no_of_times++;
 
 		cout << "INSIDE" << endl;
-		for(int i=0; i<arr_size; i++)
-			for(int j=0; j<arr_size;j++)
+		for(int i=0; i<1000; i++)
+			for(int j=0; j<1000;j++)
 				arr_1[i][j]= 0;
 
 		cout << "Here also" << endl;
@@ -6846,10 +6813,8 @@ void RoadCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 
 			vector<Node*> Path_nodes;
 
-		  	if(no_of_times == 2)
-		  		Path_nodes=find_path_1();
-		  	else
-		  		Path_nodes= find_path();
+		  	
+		 	Path_nodes= find_path();
 
 		  	cout << "inside_1" << endl;
 
@@ -6870,20 +6835,20 @@ void RoadCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 
 		  	int k = 0, sz = Path_nodes.size();
 
-		  	for(int i= 0; i < RoadMapW; i++)
-			{
-				for(int j= 0; j < RoadMapH; j++)
-				{
-					if(Path[k].x == j and Path[k].y == i and k < sz)
-					{
-						cout << 2;
-						k++;
-					}
-					else
-						cout << arr_1[j][i];
-				}
-				cout << endl;
-			}
+		 //  	for(int i= 0; i < RoadMapW; i++)
+			// {
+			// 	for(int j= 0; j < RoadMapH; j++)
+			// 	{
+			// 		// if(Path[k].x == j and Path[k].y == i and k < sz)
+			// 		// {
+			// 		// 	cout << 2;
+			// 		// 	k++;
+			// 		// }
+			// 		// else
+			// 			cout << arr_1[j][i];
+			// 	}
+			// 	cout << endl;
+			// }
 		}
 
 		 
@@ -6904,8 +6869,8 @@ void RoadCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 
 int main(int argc, char **argv)
 {
-	for(int i=0; i<arr_size; i++)
-		for(int j=0; j<arr_size;j++)
+	for(int i=0; i<1000; i++)
+		for(int j=0; j<1000;j++)
 			arr_1[i][j]= 0;
 	// for(int i=0; i<s; i++)
 	// {
